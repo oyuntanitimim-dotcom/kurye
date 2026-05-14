@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Panel (referans: açık tema, emerald vurgu) */
+    --color-panel-canvas: #f1f5f9;
+    --color-panel-sidebar: #ffffff;
+    --color-panel-accent: #059669;
+    --color-panel-accent-soft: #ecfdf5;
+}
+
+dialog::backdrop {
+    background: rgb(15 23 42 / 0.55);
+}
+
+dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+}

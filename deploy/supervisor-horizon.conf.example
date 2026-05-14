@@ -1,0 +1,21 @@
+; Laravel Horizon — örnek Supervisor parçası (Linux üretim).
+; Kopyalayın: sudo cp deploy/supervisor-horizon.conf.example /etc/supervisor/conf.d/kurye-horizon.conf
+; Sonra: sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl start kurye-horizon:*
+;
+; Yolları ve kullanıcıyı ortamınıza göre düzenleyin.
+
+[program:kurye-horizon]
+process_name=%(program_name)s
+command=php /var/www/kurye/artisan horizon
+directory=/var/www/kurye
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/kurye/storage/logs/horizon.log
+stopwaitsecs=3600
+
+; Deploy sonrası: php artisan horizon:terminate (Supervisor yeniden başlatır)

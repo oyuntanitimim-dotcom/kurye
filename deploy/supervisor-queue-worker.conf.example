@@ -1,0 +1,13 @@
+[program:kurye-queue-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php artisan queue:work redis --queue=geo,default --sleep=1 --tries=3 --timeout=60
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/kurye-queue-worker.log
+stopwaitsecs=3600
+

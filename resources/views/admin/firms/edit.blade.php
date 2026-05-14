@@ -1,0 +1,55 @@
+@extends('layouts.admin')
+
+@section('content')
+<h1 class="text-2xl font-semibold mb-6">Kurye şirketi düzenle</h1>
+<form method="post" action="{{ route('admin.firms.update', $firm) }}" enctype="multipart/form-data" class="max-w-xl space-y-4">
+    @csrf
+    @method('PUT')
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Kurye şirketi adı</label>
+        <input name="name" value="{{ old('name', $firm->name) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm text-slate-600 mb-1">Şehir</label>
+            <input name="city" value="{{ old('city', $firm->city) }}" class="w-full rounded border border-slate-300 px-3 py-2">
+        </div>
+        <div>
+            <label class="block text-sm text-slate-600 mb-1">İlçe</label>
+            <input name="district" value="{{ old('district', $firm->district) }}" class="w-full rounded border border-slate-300 px-3 py-2">
+        </div>
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Domain</label>
+        <input name="domain" value="{{ old('domain', $firm->domain) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Logo dosyası yükle</label>
+        <input type="file" name="logo_file" accept="image/*" class="w-full text-sm">
+        @error('logo_file')
+            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+        @enderror
+        <p class="text-xs text-slate-500 mt-1">Dosya yüklemek için sunucuda <code class="bg-slate-100 px-1 rounded">php artisan storage:link</code> gerekir.</p>
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Logo URL (dosya yoksa)</label>
+        <input name="logo" value="{{ old('logo', $firm->logo) }}" class="w-full rounded border border-slate-300 px-3 py-2" placeholder="https://… veya /storage/…">
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Platform paket başı ücret (₺)</label>
+        <input type="number" step="0.01" name="platform_fee_per_order" value="{{ old('platform_fee_per_order', $firm->platform_fee_per_order) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Varsayılan işletme paket ücreti (₺/teslim)</label>
+        <input type="number" step="0.01" name="default_restaurant_fee_per_delivery" value="{{ old('default_restaurant_fee_per_delivery', $firm->default_restaurant_fee_per_delivery) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
+    </div>
+    <div>
+        <label class="block text-sm text-slate-600 mb-1">Durum</label>
+        <select name="status" class="w-full rounded border border-slate-300 px-3 py-2">
+            <option value="active" @selected(old('status', $firm->status)==='active')>Aktif</option>
+            <option value="inactive" @selected(old('status', $firm->status)==='inactive')>Pasif</option>
+        </select>
+    </div>
+    <button class="rounded-lg bg-slate-900 px-4 py-2 text-white">Güncelle</button>
+</form>
+@endsection

@@ -1,0 +1,9 @@
+{
+  "products": [
+    {
+      "sku": "LS-33",
+      "active": false,
+      "price": 10.0
+    }
+  ]
+}

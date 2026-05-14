@@ -1,0 +1,37 @@
+# Example: cache-proxy for OSM raster tiles.
+#
+# Put behind your domain, enable TLS, and point MAP_TILES_URL to:
+#   https://tiles.yourdomain.com/tiles/{z}/{x}/{y}.png
+#
+# NOTE: Respect upstream tile usage policies. A cache proxy reduces repeated requests
+# but does not grant unlimited usage.
+
+proxy_cache_path /var/cache/nginx/tiles levels=1:2 keys_zone=tiles_cache:100m max_size=80g inactive=30d use_temp_path=off;
+
+server {
+    listen 80;
+    server_name tiles.yourdomain.com;
+
+    # Optional basic rate-limit (tune for your traffic)
+    limit_req_zone $binary_remote_addr zone=tiles_ratelimit:10m rate=20r/s;
+
+    location /tiles/ {
+        limit_req zone=tiles_ratelimit burst=40 nodelay;
+
+        proxy_cache tiles_cache;
+        proxy_cache_lock on;
+        proxy_cache_use_stale updating error timeout http_500 http_502 http_503 http_504;
+        proxy_cache_valid 200 30d;
+        proxy_cache_valid 404 1m;
+
+        add_header X-Cache-Status $upstream_cache_status always;
+        add_header Cache-Control "public, max-age=2592000" always;
+
+        # strip /tiles prefix and proxy to upstream OSM
+        rewrite ^/tiles/(.*)$ /$1 break;
+        proxy_pass https://tile.openstreetmap.org;
+        proxy_set_header Host tile.openstreetmap.org;
+        proxy_set_header User-Agent "CourierSaaS tiles cache";
+    }
+}
+

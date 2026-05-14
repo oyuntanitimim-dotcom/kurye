@@ -1,0 +1,26 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # OSRM (routing/ETA) - example skeleton.
+  # Usage:
+  # 1) Download a Turkey extract (.osm.pbf)
+  # 2) Run extract/partition/customize once (see docs/self-host-map-stack.md)
+  # 3) Run osrm-routed service
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    profiles: ["osrm"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./storage/osrm:/data
+    command: ["osrm-routed", "--algorithm", "mld", "/data/turkey.osrm"]
+
+volumes:
+  redis_data:
+
