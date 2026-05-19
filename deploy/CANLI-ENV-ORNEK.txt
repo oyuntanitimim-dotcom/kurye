@@ -1,0 +1,25 @@
+# public_html/.env icin ornek (kurye.tech - cPanel)
+# Redis yoksa mutlaka asagidaki QUEUE ve CACHE satirlarini kullanin.
+
+APP_NAME=Kurye
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://kurye.tech
+APP_KEY=base64:BURAYA_LOCAL_ENV_DEN_KOPYALA
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=kurye_kurye
+DB_USERNAME=kurye_kurye
+DB_PASSWORD=BURAYA_SIFRE
+
+SESSION_DRIVER=file
+SESSION_SECURE_COOKIE=true
+
+QUEUE_CONNECTION=database
+CACHE_STORE=file
+BROADCAST_CONNECTION=log
+
+# Horizon / Redis - cPanel'de genelde KAPALI kalir
+# REDIS_HOST=127.0.0.1

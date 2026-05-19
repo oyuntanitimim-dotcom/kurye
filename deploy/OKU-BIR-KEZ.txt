@@ -1,0 +1,18 @@
+BIR KEZ YAPIN (2 dakika)
+======================
+
+cPanel -> SSH Keys -> Import Key -> Authorize
+
+Asagidaki TEK SATIRI yapistirin (deploy/ANAHTAR-PUBLIC.txt ile ayni):
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKMu0NS9FSOYkwXfPbc2wgBBzJsT2I3XORCmG0mhzXse kurye-gonder-script
+
+Bundan sonra her guncelleme icin proje klasorunde:
+
+  .\gonder.ps1 "Ne degisti"
+
+Bu komut:
+- GitHub'a push eder
+- Canli siteyi gunceller (build + sunucu)
+
+Sifre sormaz (anahtar kullanir).

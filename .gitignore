@@ -30,3 +30,7 @@ Thumbs.db
 # Flutter web local Chrome profiles (created during dev runs)
 /mobile/.chrome-profiles/
 /mobile/.chrome-profile/
+
+/deploy/local.env
+*.zip
+/kurye.zip

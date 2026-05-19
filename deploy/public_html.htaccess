@@ -1,0 +1,18 @@
+# kurye.tech — public_html KOK dizinine yukleyin, adi: .htaccess
+# Laravel dosyalari (app, vendor, .env) public_html icinde; site public/ uzerinden acilir.
+# URL: https://kurye.tech/  (/public adres cubugunda GORUNMEZ)
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Zaten public/ altindaysa tekrar yonlendirme
+    RewriteCond %{REQUEST_URI} !^/public/
+
+    # Tum istekleri public/ klasorune ilet
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>
+
+# Hassas klasorlere dogrudan erisim engeli (500 verirse bu blogu silin)
+<IfModule mod_rewrite.c>
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|vendor|mobile|tests)(/|$) - [F,L]
+</IfModule>
