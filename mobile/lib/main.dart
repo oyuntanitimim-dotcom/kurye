@@ -14,8 +14,8 @@ import 'package:kurye_mobile/routes/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Varsayılan: local (127.0.0.1 / 10.0.2.2:8000)
-  // Canlı: `--dart-define=API_ENV=production` veya `.\build-canli.ps1`
+  // Varsayılan: https://kurye.tech (APK + flutter run)
+  // Local Laravel: `.\run-local.ps1` veya --dart-define=API_ENV=local
   final config = AppConfig.fromEnvironment(isWeb: kIsWeb);
   final configStore = AppConfigStore(config);
   final authStore = AuthStore();

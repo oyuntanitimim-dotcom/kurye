@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Restaurants\Models\Restaurant;
+use App\Modules\Users\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,9 @@ class RestaurantApiController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
+        if ($user === null || ! $user->hasRole(Role::CUSTOMER)) {
+            abort(403);
+        }
         $firmId = $user->firm_id;
         if ($firmId === null) {
             return response()->json(['message' => 'firm_id gerekli'], 422);
@@ -28,7 +32,12 @@ class RestaurantApiController extends Controller
 
     public function show(Request $request, Restaurant $restaurant): JsonResponse
     {
-        if ((int) $restaurant->firm_id !== (int) $request->user()->firm_id) {
+        $user = $request->user();
+        if ($user === null || ! $user->hasRole(Role::CUSTOMER)) {
+            abort(403);
+        }
+
+        if ((int) $restaurant->firm_id !== (int) $user->firm_id) {
             abort(403);
         }
 

@@ -52,6 +52,26 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Campaign::class, CampaignPolicy::class);
         Gate::policy(Coupon::class, CouponPolicy::class);
 
+        RateLimiter::for('web-login', function (Request $request): Limit {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $key = $email !== '' ? 'email:'.$email : 'ip:'.$request->ip();
+
+            return [
+                Limit::perMinute(10)->by($request->ip()),
+                Limit::perMinute(5)->by($key),
+            ];
+        });
+
+        RateLimiter::for('api-login', function (Request $request): Limit {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $key = $email !== '' ? 'email:'.$email : 'ip:'.$request->ip();
+
+            return [
+                Limit::perMinute(10)->by($request->ip()),
+                Limit::perMinute(5)->by($key),
+            ];
+        });
+
         RateLimiter::for('integration-webhook', function (Request $request): Limit {
             $per = max(10, (int) config('marketplace_integrations.webhook_per_minute', 120));
 

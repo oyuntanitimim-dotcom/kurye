@@ -47,7 +47,8 @@ return [
     |
     */
 
-    'expiration' => null,
+    // Mobil API token ömrü (dakika). Varsayılan 30 gün.
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION_MINUTES', 60 * 24 * 30),
 
     /*
     |--------------------------------------------------------------------------

@@ -55,6 +55,8 @@ class MarketingHomeController extends Controller
             throw ValidationException::withMessages(['blocks_json' => 'Bloklar bir dizi olmalıdır.']);
         }
 
+        $blocks = \App\Support\HtmlSanitizer::sanitizeMarketingBlocks($blocks);
+
         $nextVersion = (int) ($page->versions()->max('version') ?? 0) + 1;
 
         MarketingPageVersion::query()->create([

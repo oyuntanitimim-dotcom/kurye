@@ -19,9 +19,19 @@ flutter run
 
 | Ortam | Komut |
 |--------|--------|
-| **Local** (varsayılan) | `flutter run` veya `.\build-local.ps1` |
-| **Canlı** (`https://kurye.tech`) | `.\run-canli.ps1` veya `.\build-canli.ps1` |
-| **Özel URL** | `flutter run --dart-define=API_BASE_URL=https://...` |
+| **Canlı (varsayılan)** | `flutter run` veya `.\build-canli.ps1` |
+| **Local Laravel** | `.\run-local.ps1` veya `.\build-local.ps1` |
+| **Özel URL** | `--dart-define=API_BASE_URL=https://...` |
+
+Varsayılan API: **https://kurye.tech** (giriş ekranında kontrol edin).
+
+### BlueStacks
+
+1. BlueStacks’i aç → **Ayarlar → Gelişmiş → Android Debug Bridge (ADB)** = Açık  
+2. Canlı ile çalıştır: `.\run-bluestacks.ps1`  
+3. Sadece APK kur: `.\build-canli.ps1` sonra `.\install-bluestacks.ps1`  
+
+ADB bağlanmazsa: `adb connect 127.0.0.1:5555` veya `5556`
 
 Canlıya geçince eski local oturumu karışmasın diye uygulamadan **çıkış yapıp** canlı hesapla tekrar giriş yapın.
 

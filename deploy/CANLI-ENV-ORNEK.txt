@@ -21,5 +21,9 @@ QUEUE_CONNECTION=database
 CACHE_STORE=file
 BROADCAST_CONNECTION=log
 
+# Mobil API token suresi (dakika, 43200 = 30 gun)
+SANCTUM_TOKEN_EXPIRATION_MINUTES=43200
+TRUSTED_PROXIES=*
+
 # Horizon / Redis - cPanel'de genelde KAPALI kalir
 # REDIS_HOST=127.0.0.1

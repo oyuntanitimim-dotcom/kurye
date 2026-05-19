@@ -42,10 +42,15 @@ class UnifiedAuthController extends Controller
             return back()->withErrors(['email' => 'Kullanıcı adı veya şifre hatalı.'])->onlyInput('email');
         }
 
-        $request->session()->regenerate();
-
         /** @var User $user */
         $user = Auth::user();
+        if ((string) $user->status !== 'active') {
+            Auth::logout();
+
+            return back()->withErrors(['email' => 'Hesap aktif değil. Yönetici ile iletişime geçin.'])->onlyInput('email');
+        }
+
+        $request->session()->regenerate();
 
         return redirect()->intended(self::dashboardUrl($user));
     }

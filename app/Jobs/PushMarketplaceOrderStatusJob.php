@@ -76,7 +76,7 @@ class PushMarketplaceOrderStatusJob implements ShouldBeUnique, ShouldQueue
             ->first();
 
         $url = $connection?->settings_json['order_status_webhook_url'] ?? null;
-        if (! is_string($url) || $url === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+        if (! is_string($url) || $url === '' || ! \App\Support\SafeOutboundUrl::isAllowed($url)) {
             Log::info('marketplace_status_push_skipped', [
                 'order_id' => $order->id,
                 'provider' => $ext->provider,

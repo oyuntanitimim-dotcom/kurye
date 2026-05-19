@@ -1,3 +1,3 @@
-# Canlı API ile debug calistir (emulator veya USB telefon)
+# Canli API (varsayilan — flutter run ile ayni)
 Set-Location $PSScriptRoot
-flutter run --dart-define=API_ENV=production
+flutter run

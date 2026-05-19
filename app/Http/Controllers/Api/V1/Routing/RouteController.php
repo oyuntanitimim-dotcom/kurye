@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Routing;
 
 use App\Http\Controllers\Controller;
 use App\Infrastructure\Routing\OsrmClient;
+use App\Modules\Users\Models\Role;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,6 +16,11 @@ class RouteController extends Controller
 
     public function __invoke(Request $request): JsonResponse
     {
+        $user = $request->user();
+        if ($user === null || ! $user->hasRole(Role::COURIER, Role::FIRM_ADMIN, Role::RESTAURANT)) {
+            abort(403);
+        }
+
         $data = $request->validate([
             'from_lat' => ['required', 'numeric'],
             'from_lng' => ['required', 'numeric'],

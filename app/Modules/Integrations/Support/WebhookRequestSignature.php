@@ -21,6 +21,10 @@ final class WebhookRequestSignature
     {
         $secret = is_string($secret) ? trim($secret) : '';
         if ($secret === '') {
+            if (app()->environment('production')) {
+                throw new HttpException(503, 'Webhook HMAC gizli anahtarı yapılandırılmamış (webhook_secret).');
+            }
+
             return;
         }
 

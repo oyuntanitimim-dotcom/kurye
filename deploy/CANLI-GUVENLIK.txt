@@ -1,0 +1,64 @@
+CANLI ORTAM GUVENLIK KONTROL LISTESI (kurye.tech)
+================================================
+
+Her deploy sonrasi ve rakip / kotu niyetli saldiri riski icin kontrol edin.
+
+ZORUNLU (.env)
+--------------
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://kurye.tech
+SESSION_SECURE_COOKIE=true
+SANCTUM_TOKEN_EXPIRATION_MINUTES=43200
+
+Sunucuda ASLA birakmayin:
+- public/teshis.php (deploy sonrasi silinir)
+- APP_DEBUG=true
+- Varsayilan seed sifreleri (password)
+
+ENTEGRASYON WEBHOOK
+-------------------
+Her aktif entegrasyonda:
+- webhook_token guclu ve gizli
+- webhook_secret + HMAC (canlida zorunlu — kod uyarir)
+- order_status_webhook_url sadece https ve dis ag
+- Isteginiz: settings_json icinde webhook_allowed_ips: ["1.2.3.4"] (opsiyonel)
+- Ayni siparis govdesi 10 dk icinde tekrar gelirse yoksayilir (replay)
+
+MOBIL API
+---------
+- Login: throttle (IP + e-posta)
+- Roller: courier, firm_admin, restaurant
+- Token: 30 gun, pasif hesap tokenlari silinir
+
+WEB PANEL
+---------
+- /giris throttle (brute-force korumasi)
+- Pasif kullanici giris yapamaz
+- Admin / firma / restoran / kurye ayri middleware
+
+SUNUCU (cPanel)
+---------------
+- SSL aktif (Let's Encrypt)
+- public_html disinda .env erisilemez
+- id_rsa / sifreler repoda yok
+- Guclu DB sifresi, duzenli yedek
+
+SALDIRI TURLERI — NE YAPTIK
+---------------------------
+Brute-force giris     -> throttle web + API login
+Token calinmasi       -> 30 gun, yeni giris=eski token silinir, pasif=token sil
+Rol atlama (API)      -> route role middleware + api.tenant (firma/siparis)
+SSRF (webhook URL)    -> SafeOutboundUrl (https, ozel IP yok)
+Sahte siparis         -> token+HMAC, replay dedupe, idempotent external_order_id
+XSS (pazarlama CMS)   -> HtmlSanitizer
+Bilgi sizintisi       -> SecurityHeaders, DEBUG kapali
+Webhook sahteciligi   -> token + canlida HMAC zorunlu
+
+MANUEL KONTROL
+--------------
+curl -I https://kurye.tech  -> Strict-Transport-Security
+https://kurye.tech/api/v1/app-config  -> 200 (public, dusuk risk)
+https://kurye.tech/horizon  -> 403 veya login (super_admin)
+
+Supheli aktivite: storage/logs/laravel.log

@@ -17,9 +17,9 @@ class AppConfig {
   static const String productionApiBaseUrl = 'https://kurye.tech';
 
   /// Öncelik:
-  /// 1. `--dart-define=API_BASE_URL=...` (tam URL)
-  /// 2. `--dart-define=API_ENV=production` → [productionApiBaseUrl]
-  /// 3. Varsayılan local (web: 127.0.0.1, Android emülatör: 10.0.2.2)
+  /// 1. `--dart-define=API_BASE_URL=...`
+  /// 2. `--dart-define=API_ENV=local` → PC/emülatör local Laravel
+  /// 3. Varsayılan (APK + flutter run + Chrome): [productionApiBaseUrl]
   factory AppConfig.fromEnvironment({
     required bool isWeb,
   }) {
@@ -35,13 +35,16 @@ class AppConfig {
     }
 
     final env = apiEnv.trim().toLowerCase();
-    if (env == 'production' || env == 'canli' || env == 'live') {
-      return AppConfig.production();
+    if (env == 'local' || env == 'development' || env == 'dev') {
+      return AppConfig._localDefaults(isWeb: isWeb);
     }
 
+    return AppConfig.production();
+  }
+
+  static AppConfig _localDefaults({required bool isWeb}) {
     final apiBaseUrl =
         isWeb ? 'http://127.0.0.1:8000' : 'http://10.0.2.2:8000';
-
     return AppConfig(
       apiBaseUrl: apiBaseUrl,
       tilesUrlTemplate: _defaultTilesUrlTemplate,

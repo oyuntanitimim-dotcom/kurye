@@ -56,10 +56,12 @@ Route::get('/takip/{token}', [OrderTrackingController::class, 'show'])
     ->name('order.tracking');
 
 Route::get('/giris', [UnifiedAuthController::class, 'showLogin'])->name('login');
-Route::post('/giris', [UnifiedAuthController::class, 'login'])->name('login.store');
+Route::post('/giris', [UnifiedAuthController::class, 'login'])
+    ->middleware('throttle:web-login')
+    ->name('login.store');
 Route::post('/cikis', [UnifiedAuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'active.account'])->group(function (): void {
     Route::get('/bildirimler', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/bildirimler/tumunu-okundu', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::post('/bildirimler/{notification}/okundu', [NotificationController::class, 'markRead'])->name('notifications.markRead');
@@ -89,7 +91,7 @@ Route::get('/siparislerim/{order}', function (\App\Modules\Orders\Models\Order $
 })->whereNumber('order')->name('legacy.shop.order');
 Route::permanentRedirect('/profil', '/alisveris/profil');
 
-Route::prefix('admin')->middleware(['auth', 'admin.auth'])->group(function (): void {
+Route::prefix('admin')->middleware(['auth', 'active.account', 'admin.auth'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('admin.dashboard');
 
     Route::get('/firmalar', [AdminFirmController::class, 'index'])->name('admin.firms.index');
@@ -150,7 +152,7 @@ Route::prefix('admin')->middleware(['auth', 'admin.auth'])->group(function (): v
     });
 });
 
-Route::prefix('firma')->middleware(['auth', 'firm.auth'])->group(function (): void {
+Route::prefix('firma')->middleware(['auth', 'active.account', 'firm.auth'])->group(function (): void {
     Route::get('/', FirmDashboardController::class)->name('firm.dashboard');
     Route::get('/operasyon', [FirmOperationsController::class, 'index'])->name('firm.operations.index');
     Route::get('/operasyon/ozet', [FirmOperationsController::class, 'snapshot'])
@@ -220,7 +222,7 @@ Route::prefix('firma')->middleware(['auth', 'firm.auth'])->group(function (): vo
     Route::put('/ayarlar', [FirmSettingsController::class, 'update'])->name('firm.settings.update');
 });
 
-Route::prefix('restoran')->middleware(['auth', 'restaurant.auth'])->group(function (): void {
+Route::prefix('restoran')->middleware(['auth', 'active.account', 'restaurant.auth'])->group(function (): void {
     Route::get('/', RestaurantDashboardController::class)->name('restaurant.dashboard');
     Route::get('/siparisler', [RestaurantOrderController::class, 'index'])->name('restaurant.orders.index');
     Route::get('/siparisler/poll', [RestaurantOrderController::class, 'poll'])
@@ -294,7 +296,7 @@ Route::prefix('restoran')->middleware(['auth', 'restaurant.auth'])->group(functi
     Route::put('/ayarlar', [RestaurantSettingsController::class, 'update'])->name('restaurant.settings.update');
 });
 
-Route::prefix('kurye')->middleware(['auth', 'courier.auth'])->group(function (): void {
+Route::prefix('kurye')->middleware(['auth', 'active.account', 'courier.auth'])->group(function (): void {
     Route::get('/', CourierDashboardController::class)->name('courier.dashboard');
     Route::get('/kazanc', CourierEarningsController::class)->name('courier.earnings');
     Route::post('/siparisler/{order}/kabul', [CourierOrderController::class, 'accept'])->name('courier.orders.accept');
@@ -315,9 +317,11 @@ Route::prefix('alisveris')->middleware(['firm.resolve'])->group(function (): voi
     Route::post('/sepet/guncelle', [ShopController::class, 'updateCart'])->name('shop.cart.update');
 
     Route::get('/kayit', [ShopAuthController::class, 'showRegister'])->name('shop.register');
-    Route::post('/kayit', [ShopAuthController::class, 'register'])->name('shop.register.store');
+    Route::post('/kayit', [ShopAuthController::class, 'register'])
+        ->middleware('throttle:10,1')
+        ->name('shop.register.store');
 
-    Route::middleware('auth')->group(function (): void {
+    Route::middleware(['auth', 'active.account'])->group(function (): void {
         Route::get('/odeme', [ShopController::class, 'checkoutForm'])->name('shop.checkout');
         Route::post('/odeme', [ShopController::class, 'checkout'])->name('shop.checkout.store');
         Route::get('/siparislerim', [ShopController::class, 'orders'])->name('shop.orders');

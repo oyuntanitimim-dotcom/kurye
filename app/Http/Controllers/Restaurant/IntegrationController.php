@@ -105,9 +105,9 @@ final class IntegrationController extends Controller
         $hookUrl = trim((string) $request->input('order_status_webhook_url', ''));
         if ($hookUrl === '') {
             unset($settings['order_status_webhook_url']);
-        } elseif (filter_var($hookUrl, FILTER_VALIDATE_URL) === false) {
+        } elseif (! \App\Support\SafeOutboundUrl::isAllowed($hookUrl)) {
             return redirect()->back()->withInput()->withErrors([
-                'order_status_webhook_url' => 'Geçerli bir http(s) adresi girin.',
+                'order_status_webhook_url' => 'Yalnızca herkese açık https adresleri kabul edilir (iç ağ adresleri engellenir).',
             ]);
         } else {
             $settings['order_status_webhook_url'] = $hookUrl;

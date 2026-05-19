@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->redirectGuestsTo(fn () => route('login'));
 
+        $trusted = env('TRUSTED_PROXIES', '*');
+        $middleware->trustProxies(at: $trusted === '*' ? '*' : array_filter(array_map('trim', explode(',', (string) $trusted))));
+
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         $middleware->alias([
             'admin.auth' => \App\Http\Middleware\EnsureAdminAuthenticated::class,
             'firm.auth' => \App\Http\Middleware\EnsureFirmAdminAuthenticated::class,
@@ -22,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'courier.auth' => \App\Http\Middleware\EnsureCourierAuthenticated::class,
             'firm.resolve' => \App\Http\Middleware\ResolveFirmFromDomain::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
+            'active.account' => \App\Http\Middleware\EnsureActiveAccount::class,
+            'api.tenant' => \App\Http\Middleware\EnsureApiTenantBoundaries::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

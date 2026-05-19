@@ -9,6 +9,7 @@ use App\Enums\OrderStatus;
 use App\Modules\Integrations\Models\IntegrationConnection;
 use App\Modules\Integrations\Models\IntegrationExternalOrder;
 use App\Modules\Integrations\Services\MarketplaceIngestService;
+use App\Modules\Integrations\Support\WebhookGuard;
 use App\Modules\Integrations\Support\WebhookRequestSignature;
 use App\Services\Integrations\TrendyolGoMealWebhookPayloadMapper;
 use App\Modules\Orders\Services\OrderStateService;
@@ -62,11 +63,7 @@ class IntegrationWebhookController extends Controller
             abort(404, 'Entegrasyon bulunamadı.');
         }
 
-        // UI: show last successful webhook receive time.
         $settings = is_array($connection->settings_json) ? $connection->settings_json : [];
-        $settings['last_webhook_received_at'] = now()->toISOString();
-        $connection->settings_json = $settings;
-        $connection->save();
 
         $headerFirmId = (int) $request->header('X-Firm-Id', 0);
         if ($headerFirmId > 0 && $headerFirmId !== (int) $connection->firm_id) {
@@ -77,6 +74,19 @@ class IntegrationWebhookController extends Controller
             ? $settings['webhook_secret']
             : null;
         WebhookRequestSignature::assertValidWhenSecretConfigured($request, $webhookSecret);
+        if (WebhookGuard::assertConnectionAllowed($request, $settings, (int) $connection->id)) {
+            return response()->json([
+                'ok' => true,
+                'request_id' => $requestId,
+                'skipped' => true,
+                'reason' => 'duplicate_payload',
+            ])->header('X-Request-Id', $requestId);
+        }
+
+        // Kimlik doğrulama sonrası istatistik güncelle
+        $settings['last_webhook_received_at'] = now()->toISOString();
+        $connection->settings_json = $settings;
+        $connection->save();
 
         try {
             $payload = $request->all();

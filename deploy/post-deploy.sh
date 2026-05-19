@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT="${DEPLOY_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$ROOT"
 
+echo "==> Security cleanup"
+rm -f public/teshis.php 2>/dev/null || true
+
 echo "==> Permissions"
 find . -type d -exec chmod 755 {} \;
 find . -type f -exec chmod 644 {} \;
