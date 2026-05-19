@@ -8,6 +8,7 @@
 
     <!-- Phone call (müşteri ara) -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="kurye_mobile"
         android:name="${applicationName}"

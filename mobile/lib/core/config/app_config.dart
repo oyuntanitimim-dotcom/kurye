@@ -13,18 +13,34 @@ class AppConfig {
       'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   static const String _defaultTilesAttribution = 'OpenStreetMap contributors';
 
-  /// Öncelik: `--dart-define=API_BASE_URL=...` → aksi halde güvenli varsayılanlar.
-  ///
-  /// Web/Chrome: `http://127.0.0.1:8000`
-  /// Android emülatör/BlueStacks: çoğunlukla `http://10.0.2.2:8000`
+  /// Canlı Laravel (production).
+  static const String productionApiBaseUrl = 'https://kurye.tech';
+
+  /// Öncelik:
+  /// 1. `--dart-define=API_BASE_URL=...` (tam URL)
+  /// 2. `--dart-define=API_ENV=production` → [productionApiBaseUrl]
+  /// 3. Varsayılan local (web: 127.0.0.1, Android emülatör: 10.0.2.2)
   factory AppConfig.fromEnvironment({
     required bool isWeb,
   }) {
     const envApi = String.fromEnvironment('API_BASE_URL');
+    const apiEnv = String.fromEnvironment('API_ENV');
 
-    final apiBaseUrl = (envApi.trim().isNotEmpty)
-        ? envApi.trim()
-        : (isWeb ? 'http://127.0.0.1:8000' : 'http://10.0.2.2:8000');
+    if (envApi.trim().isNotEmpty) {
+      return AppConfig(
+        apiBaseUrl: envApi.trim(),
+        tilesUrlTemplate: _defaultTilesUrlTemplate,
+        tilesAttribution: _defaultTilesAttribution,
+      );
+    }
+
+    final env = apiEnv.trim().toLowerCase();
+    if (env == 'production' || env == 'canli' || env == 'live') {
+      return AppConfig.production();
+    }
+
+    final apiBaseUrl =
+        isWeb ? 'http://127.0.0.1:8000' : 'http://10.0.2.2:8000';
 
     return AppConfig(
       apiBaseUrl: apiBaseUrl,
@@ -32,6 +48,13 @@ class AppConfig {
       tilesAttribution: _defaultTilesAttribution,
     );
   }
+
+  /// Canlı sunucu (kurye.tech).
+  factory AppConfig.production() => const AppConfig(
+        apiBaseUrl: productionApiBaseUrl,
+        tilesUrlTemplate: _defaultTilesUrlTemplate,
+        tilesAttribution: _defaultTilesAttribution,
+      );
 
   /// Emülatör / aynı makine (PC’de Flutter run).
   factory AppConfig.localhost() => const AppConfig(

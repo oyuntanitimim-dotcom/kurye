@@ -1,10 +1,14 @@
-# Tek komut: local build + git push + canli guncelleme
+# Tek komut: local build + git push + canli guncelleme (kurye.tech)
 # Kullanim:  .\gonder.ps1
 #            .\gonder.ps1 "Panel duzeltmesi"
+# Detay: deploy\CANLI-GUNLUK.txt
 
 $ErrorActionPreference = "Stop"
 $Root = $PSScriptRoot
 Set-Location $Root
+
+Write-Host "`n=== CANLI DEPLOY -> https://kurye.tech ===" -ForegroundColor Green
+Write-Host "Mobil APK ayri: mobile\build-canli.ps1`n" -ForegroundColor DarkGray
 
 $cfgPath = Join-Path $Root "deploy\local.env"
 if (-not (Test-Path $cfgPath)) {
@@ -21,6 +25,9 @@ $msg = if ($args.Count -gt 0) { $args -join " " } else { "Deploy: $(Get-Date -Fo
 $sshArgs = @()
 if ($SSH_KEY -and (Test-Path $SSH_KEY)) {
     $sshArgs = @("-i", $SSH_KEY)
+    Write-Host "SSH: anahtar dosyasi kullaniliyor." -ForegroundColor DarkGray
+} else {
+    Write-Host "SSH: sifre sorulacak (cPanel kurye sifresi)." -ForegroundColor DarkGray
 }
 
 Write-Host "`n==> 1/5 Build (composer + npm)" -ForegroundColor Cyan
@@ -69,7 +76,12 @@ tar -xzf $remoteTar
 rm -f $remoteTar
 bash deploy/post-deploy.sh
 "@
-& ssh @sshArgs "${SSH_USER}@${SSH_HOST}" $remoteScript
+if (-not (& ssh @sshArgs "${SSH_USER}@${SSH_HOST}" $remoteScript)) {
+    Write-Host "`nSSH basarisiz." -ForegroundColor Red
+    Write-Host "- id_rsa parolali: once .\deploy\ssh-agent-bir-kez.ps1" -ForegroundColor Yellow
+    Write-Host "- veya deploy\local.env icinde SSH_KEY satirini kaldirin (cPanel sifresi)" -ForegroundColor Yellow
+    exit 1
+}
 
 Remove-Item $tarPath -Force -ErrorAction SilentlyContinue
 Write-Host "`nTamam: https://kurye.tech/ ve GitHub guncellendi." -ForegroundColor Green

@@ -1,18 +1,30 @@
-BIR KEZ YAPIN (2 dakika)
-======================
+SSH ANAHTARI HAKKINDA
+====================
 
-cPanel -> SSH Keys -> Import Key -> Authorize
+cPanel'e verdiginiz satir PUBLIC key'dir (sunucu tarafi) — dogru yaptiniz.
+PC'den otomatik deploy icin ayrica PRIVATE key veya sifre gerekir.
 
-Asagidaki TEK SATIRI yapistirin (deploy/ANAHTAR-PUBLIC.txt ile ayni):
+ZATEN SIFRE ILE BAGLANIYORSANIZ
+------------------------------
+Hicbir sey yapmayin. deploy/local.env icinde SSH_KEY bos birakildi.
+gonder.ps1 calisinca sifre sorar (2 kez: scp + ssh).
 
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKMu0NS9FSOYkwXfPbc2wgBBzJsT2I3XORCmG0mhzXse kurye-gonder-script
+CPANEL'DEN PRIVATE KEY INDIRDIYSENIZ
+------------------------------------
+deploy/local.env icinde:
+  SSH_KEY=C:\yol\indirdiginiz_private_key
 
-Bundan sonra her guncelleme icin proje klasorunde:
+Sonra sifre sormaz.
 
-  .\gonder.ps1 "Ne degisti"
+YENI ANAHTAR (github_deploy_kurye) ZORUNLU DEGIL
+------------------------------------------------
+Sadece sifresiz otomatik istiyorsaniz kullanilir.
+deploy/ANAHTAR-PUBLIC.txt — isterseniz ekstra authorize edebilirsiniz.
 
-Bu komut:
-- GitHub'a push eder
-- Canli siteyi gunceller (build + sunucu)
+GUNLUK KULLANIM (CANLI)
+-----------------------
+  cd C:\xampp\htdocs\kurye
+  .\gonder.ps1 "Aciklama"
 
-Sifre sormaz (anahtar kullanir).
+  Mobil canli test:  cd mobile  ->  .\build-canli.ps1
+  Tam akis: deploy\CANLI-GUNLUK.txt

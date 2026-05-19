@@ -1,0 +1,30 @@
+CANLI CALISMA — GUNLUK AKIS
+============================
+
+1) Kodu burada duzenle (C:\xampp\htdocs\kurye)
+
+2) Canliya gonder (web + API):
+     cd C:\xampp\htdocs\kurye
+     .\gonder.ps1 "Ne degisti kisa aciklama"
+
+   Bu script:
+   - composer + npm build yapar
+   - GitHub'a push eder (main)
+   - Dosyalari kurye.tech sunucusuna yukler
+   - migrate + cache temizler
+
+3) Mobil (ayri — sunucuya gitmez):
+     cd mobile
+     .\build-canli.ps1
+   APK'yi telefona kur.
+
+ONEMLI
+------
+- Sunucudaki .env ASLA gonder.ps1 ile ezilmez (pakette yok).
+- id_rsa parolaliysa gonder.ps1 iki kez sorar (scp + ssh).
+- Sifre ile baglanmak icin deploy/local.env icinde SSH_KEY satirini silin/bos birakin.
+
+KONTROL
+-------
+- Site: https://kurye.tech
+- API:  https://kurye.tech/api/v1/app-config

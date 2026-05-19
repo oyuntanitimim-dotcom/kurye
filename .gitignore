@@ -32,5 +32,7 @@ Thumbs.db
 /mobile/.chrome-profile/
 
 /deploy/local.env
+/id_rsa
+/id_rsa.pub
 *.zip
 /kurye.zip

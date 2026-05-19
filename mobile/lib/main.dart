@@ -14,10 +14,8 @@ import 'package:kurye_mobile/routes/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Varsayılanlar:
-  // - Web/Chrome: 127.0.0.1:8000
-  // - Android emülatör/BlueStacks: 10.0.2.2:8000
-  // Override: `--dart-define=API_BASE_URL=http://...`
+  // Varsayılan: local (127.0.0.1 / 10.0.2.2:8000)
+  // Canlı: `--dart-define=API_ENV=production` veya `.\build-canli.ps1`
   final config = AppConfig.fromEnvironment(isWeb: kIsWeb);
   final configStore = AppConfigStore(config);
   final authStore = AuthStore();

@@ -15,10 +15,15 @@ flutter pub get
 flutter run
 ```
 
-### Konfigürasyon
+### Konfigürasyon (API adresi)
 
-`lib/core/config/app_config.dart` içinde:
+| Ortam | Komut |
+|--------|--------|
+| **Local** (varsayılan) | `flutter run` veya `.\build-local.ps1` |
+| **Canlı** (`https://kurye.tech`) | `.\run-canli.ps1` veya `.\build-canli.ps1` |
+| **Özel URL** | `flutter run --dart-define=API_BASE_URL=https://...` |
 
-- `apiBaseUrl` (örn. `http://127.0.0.1:8000`)
-- `tilesUrlTemplate` (örn. `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`)
+Canlıya geçince eski local oturumu karışmasın diye uygulamadan **çıkış yapıp** canlı hesapla tekrar giriş yapın.
+
+`lib/core/config/app_config.dart` — `API_ENV=production` veya `API_BASE_URL` ile derleme zamanında ayarlanır.
 
