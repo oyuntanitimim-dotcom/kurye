@@ -14,6 +14,7 @@
     <p class="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Ana menü</p>
     <a class="{{ request()->routeIs('firm.dashboard') ? $active : $idle }}" href="{{ route('firm.dashboard') }}">Gösterge</a>
     <a class="{{ request()->routeIs('firm.operations.*') ? $active : $idle }}" href="{{ route('firm.operations.index') }}">Operasyon</a>
+    <a class="{{ request()->routeIs('firm.credits.*') ? $active : $idle }}" href="{{ route('firm.credits.index') }}">Kontör</a>
 </div>
 
 <details class="group mt-3" @if($ordersBase) open @endif>

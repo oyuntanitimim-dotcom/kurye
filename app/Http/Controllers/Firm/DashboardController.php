@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Firm;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\Couriers\Models\Courier;
+use App\Modules\Firms\Models\Firm;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Restaurants\Models\Restaurant;
 use App\Support\FinanceReporting;
@@ -14,9 +16,14 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly FirmCreditService $firmCreditService) {}
+
     public function __invoke(): View
     {
         $firmId = Auth::user()->firm_id;
+        $firm = Firm::query()->find($firmId);
+        $creditBalance = (int) ($firm?->credit_balance ?? 0);
+        $creditsPerOrder = $firm !== null ? $this->firmCreditService->creditsPerOrder($firm) : 1;
 
         $monthStart = Carbon::now()->startOfMonth();
         $monthEnd = Carbon::now()->endOfMonth();
@@ -40,6 +47,8 @@ class DashboardController extends Controller
                 ->readyForFirmCourierPool()
                 ->count(),
             'activeCourierCount' => Courier::query()->where('firm_id', $firmId)->where('status', 'active')->count(),
+            'creditBalance' => $creditBalance,
+            'creditsPerOrder' => $creditsPerOrder,
             // Restoran "Hazır" demeden önceki aşamalar (beklemede / onay / hazırlık) firma özetinde gösterilmez.
             'recentOrders' => Order::query()
                 ->where('firm_id', $firmId)

@@ -20,12 +20,12 @@
         <p class="font-medium mt-1">{{ $firm->status }}</p>
     </div>
     <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-slate-500 text-xs uppercase tracking-wide">Platform paket başı</p>
-        <p class="font-medium mt-1">{{ number_format((float) $firm->platform_fee_per_order, 2) }} ₺</p>
+        <p class="text-slate-500 text-xs uppercase tracking-wide">Paket başı kontör</p>
+        <p class="font-medium mt-1">{{ $firm->credits_per_order_override ?? 'Genel varsayılan' }} @if($firm->credits_per_order_override) kontör @endif</p>
     </div>
     <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p class="text-slate-500 text-xs uppercase tracking-wide">Vars. işletme paket ücreti</p>
-        <p class="font-medium mt-1">{{ number_format((float) $firm->default_restaurant_fee_per_delivery, 2) }} ₺</p>
+        <p class="text-slate-500 text-xs uppercase tracking-wide">Kontör bakiyesi</p>
+        <p class="font-medium mt-1 {{ (int) $firm->credit_balance <= 0 ? 'text-red-600' : '' }}">{{ number_format((int) $firm->credit_balance) }} kontör</p>
     </div>
     @if($firm->city || $firm->district)
         <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:col-span-2">

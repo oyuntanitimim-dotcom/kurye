@@ -55,6 +55,7 @@ $tarArgs = @("-czf", $tarPath)
 foreach ($d in $excludeDirs) { $tarArgs += "--exclude=$d" }
 $tarArgs += "--exclude=.env"
 $tarArgs += "--exclude=*.zip"
+$tarArgs += "--exclude=*.exe"
 $tarArgs += "--exclude=storage/logs"
 $tarArgs += "--exclude=storage/framework/cache"
 $tarArgs += "--exclude=storage/framework/sessions"

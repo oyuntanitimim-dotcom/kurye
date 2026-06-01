@@ -8,6 +8,7 @@ use App\Modules\Couriers\Models\Courier;
 use App\Modules\Firms\Models\Firm;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Restaurants\Models\Restaurant;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Orders\Services\AutoDispatchService;
 use App\Modules\Orders\Services\OrderStateService;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +34,8 @@ class OrderController extends Controller
 
     public function __construct(
         private readonly OrderStateService $orderStateService,
-        private readonly AutoDispatchService $autoDispatchService
+        private readonly AutoDispatchService $autoDispatchService,
+        private readonly FirmCreditService $firmCreditService
     ) {}
 
     /**
@@ -295,6 +297,10 @@ class OrderController extends Controller
             return back()->with('error', 'Restoran henüz kurye çağırmadı.');
         }
 
+        if (! $this->firmCreditService->canAssign($order)) {
+            return back()->with('error', 'Kontör yetersiz. Kurye atayabilmek için kontör yükleyin.');
+        }
+
         $reassignStatuses = [
             OrderStatus::CourierAssigned->value,
             OrderStatus::CourierAccepted->value,
@@ -342,6 +348,10 @@ class OrderController extends Controller
             && $order->restaurant_courier_requested_at === null
         ) {
             return back()->with('error', 'Restoran henüz kurye çağırmadı.');
+        }
+
+        if (! $this->firmCreditService->canAssign($order)) {
+            return back()->with('error', 'Kontör yetersiz. Kurye atayabilmek için kontör yükleyin.');
         }
 
         $result = $this->autoDispatchService->dispatchOrder(

@@ -3,6 +3,23 @@
 
 @section('content')
 <h1 class="text-2xl font-semibold mb-8">Kurye şirketi paneli</h1>
+
+<a href="{{ route('firm.credits.index') }}"
+   class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border p-5 transition {{ $creditBalance <= 0 ? 'border-red-300 bg-red-50 hover:bg-red-100/70' : ($creditBalance < $creditsPerOrder * 10 ? 'border-amber-300 bg-amber-50 hover:bg-amber-100/70' : 'border-slate-200 bg-white hover:border-amber-300/80') }}">
+    <div>
+        <div class="text-sm text-slate-500">Kontör bakiyesi</div>
+        <div class="text-3xl font-bold tabular-nums {{ $creditBalance <= 0 ? 'text-red-700' : 'text-slate-900' }}">{{ number_format($creditBalance) }}</div>
+        @if($creditBalance <= 0)
+            <p class="mt-1 text-xs font-semibold text-red-700">Kontör bitti — kurye atayamazsınız. Kontör yükleyin →</p>
+        @elseif($creditBalance < $creditsPerOrder * 10)
+            <p class="mt-1 text-xs font-semibold text-amber-700">Kontör azalıyor — yüklemek için tıklayın →</p>
+        @else
+            <p class="mt-1 text-xs text-slate-500">Sipariş başı {{ $creditsPerOrder }} kontör · Kontör satın al →</p>
+        @endif
+    </div>
+    <span class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white">Kontör yükle</span>
+</a>
+
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5 mb-10">
     <div class="rounded-xl border border-slate-200 bg-white p-6">
         <div class="text-sm text-slate-500">Restoran</div>

@@ -36,3 +36,7 @@ Thumbs.db
 /id_rsa.pub
 *.zip
 /kurye.zip
+
+# Yanlislikla repoya dusen buyuk ikili / kurulum dosyalari
+*.exe
+/_*.php

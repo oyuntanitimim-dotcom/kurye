@@ -2,6 +2,16 @@
 
 @section('content')
 <h1 class="text-2xl font-semibold mb-6">{{ $title }}</h1>
+@if($errors->any())
+    <div class="max-w-xl mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p class="font-medium mb-1">Kurye kaydedilemedi:</p>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 <form method="post" action="{{ route('firm.couriers.store') }}" class="max-w-xl space-y-4">
     @csrf
     <div>
@@ -17,7 +27,8 @@
     </div>
     <div>
         <label class="block text-sm text-slate-600 mb-1">Şifre</label>
-        <input type="password" name="password" required class="w-full rounded border border-slate-300 px-3 py-2">
+        <input type="password" name="password" required minlength="8" class="w-full rounded border border-slate-300 px-3 py-2">
+        <p class="text-xs text-slate-500 mt-1">En az 8 karakter.</p>
     </div>
     <div>
         <label class="block text-sm text-slate-600 mb-1">Telefon</label>

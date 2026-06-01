@@ -8,6 +8,7 @@ use App\Enums\OrderStatus;
 use App\Infrastructure\Geo\Contracts\CourierGeoLocatorInterface;
 use App\Modules\Couriers\Models\Courier;
 use App\Modules\Firms\Models\Firm;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderDispatchDecision;
 use App\Modules\Restaurants\Models\Restaurant;
@@ -27,6 +28,7 @@ class AutoDispatchService
     public function __construct(
         private readonly OrderStateService $orderStateService,
         private readonly CourierGeoLocatorInterface $geoLocator,
+        private readonly FirmCreditService $firmCreditService,
     ) {}
 
     /**
@@ -76,6 +78,16 @@ class AutoDispatchService
                 ]);
 
                 return ['ok' => false, 'message' => 'Otomatik atama kapalı.', 'courier_id' => null];
+            }
+
+            if (! $this->firmCreditService->canAssign($locked)) {
+                $this->logDecision($locked, $trigger, $createdByUserId, null, [
+                    'error' => 'insufficient_credit',
+                    'credit_balance' => (int) $firm->credit_balance,
+                    'credits_per_order' => $this->firmCreditService->creditsPerOrder($firm),
+                ]);
+
+                return ['ok' => false, 'message' => 'Kontör yetersiz. Lütfen kontör yükleyin.', 'courier_id' => null];
             }
 
             $restaurant = Restaurant::query()->whereKey($locked->restaurant_id)->first();

@@ -52,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Campaign::class, CampaignPolicy::class);
         Gate::policy(Coupon::class, CouponPolicy::class);
 
-        RateLimiter::for('web-login', function (Request $request): Limit {
+        RateLimiter::for('web-login', function (Request $request): array {
             $email = strtolower(trim((string) $request->input('email', '')));
             $key = $email !== '' ? 'email:'.$email : 'ip:'.$request->ip();
 
@@ -62,7 +62,7 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
-        RateLimiter::for('api-login', function (Request $request): Limit {
+        RateLimiter::for('api-login', function (Request $request): array {
             $email = strtolower(trim((string) $request->input('email', '')));
             $key = $email !== '' ? 'email:'.$email : 'ip:'.$request->ip();
 

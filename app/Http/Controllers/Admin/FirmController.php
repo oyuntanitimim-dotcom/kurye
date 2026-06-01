@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Firms\Models\Firm;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Restaurants\Models\Restaurant;
 use App\Modules\Users\Models\Role;
 use App\Modules\Users\Models\User;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 
 class FirmController extends Controller
 {
+    public function __construct(private readonly FirmCreditService $firmCreditService) {}
+
     public function index(Request $request): View
     {
         $query = Firm::query();
@@ -34,12 +37,16 @@ class FirmController extends Controller
             'title' => 'Kurye şirketleri',
             'firms' => $query->latest('id')->paginate(20)->appends($request->query()),
             'filters' => $request->only(['q', 'status']),
+            'globalCreditsPerOrder' => $this->firmCreditService->globalCreditsPerOrder(),
         ]);
     }
 
     public function create(): View
     {
-        return view('admin.firms.create', ['title' => 'Yeni kurye şirketi']);
+        return view('admin.firms.create', [
+            'title' => 'Yeni kurye şirketi',
+            'globalCreditsPerOrder' => $this->firmCreditService->globalCreditsPerOrder(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -49,8 +56,7 @@ class FirmController extends Controller
             'city' => ['nullable', 'string', 'max:120'],
             'district' => ['nullable', 'string', 'max:120'],
             'domain' => ['required', 'string', 'max:190', 'unique:firms,domain'],
-            'platform_fee_per_order' => ['required', 'numeric', 'min:0', 'max:999999.99'],
-            'default_restaurant_fee_per_delivery' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'credits_per_order_override' => ['nullable', 'integer', 'min:1', 'max:10000'],
             'admin_name' => ['required', 'string', 'max:190'],
             'admin_email' => ['required', 'email', 'max:190', 'unique:users,email'],
             'admin_password' => ['required', 'string', 'min:8'],
@@ -61,8 +67,7 @@ class FirmController extends Controller
             'city' => $data['city'] ?? null,
             'district' => $data['district'] ?? null,
             'domain' => strtolower($data['domain']),
-            'platform_fee_per_order' => $data['platform_fee_per_order'],
-            'default_restaurant_fee_per_delivery' => $data['default_restaurant_fee_per_delivery'],
+            'credits_per_order_override' => $data['credits_per_order_override'] ?? null,
             'status' => 'active',
         ]);
 
@@ -95,6 +100,7 @@ class FirmController extends Controller
         return view('admin.firms.edit', [
             'title' => 'Kurye şirketi düzenle',
             'firm' => $firm,
+            'globalCreditsPerOrder' => $this->firmCreditService->globalCreditsPerOrder(),
         ]);
     }
 
@@ -105,8 +111,7 @@ class FirmController extends Controller
             'city' => ['nullable', 'string', 'max:120'],
             'district' => ['nullable', 'string', 'max:120'],
             'domain' => ['required', 'string', 'max:190', 'unique:firms,domain,'.$firm->id],
-            'platform_fee_per_order' => ['required', 'numeric', 'min:0', 'max:999999.99'],
-            'default_restaurant_fee_per_delivery' => ['required', 'numeric', 'min:0', 'max:999999.99'],
+            'credits_per_order_override' => ['nullable', 'integer', 'min:1', 'max:10000'],
             'status' => ['required', 'in:active,inactive'],
             'logo' => ['nullable', 'string', 'max:500'],
             'logo_file' => ['nullable', 'image', 'max:2048'],
@@ -123,8 +128,7 @@ class FirmController extends Controller
             'city' => $data['city'] ?? null,
             'district' => $data['district'] ?? null,
             'domain' => strtolower($data['domain']),
-            'platform_fee_per_order' => $data['platform_fee_per_order'],
-            'default_restaurant_fee_per_delivery' => $data['default_restaurant_fee_per_delivery'],
+            'credits_per_order_override' => $data['credits_per_order_override'] ?? null,
             'status' => $data['status'],
             'logo' => $logoValue,
         ]);

@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Jobs\CreateInAppNotificationJob;
 use App\Jobs\PushMarketplaceOrderStatusJob;
 use App\Modules\Couriers\Models\Courier;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Models\OrderStatusHistory;
 use App\Modules\Users\Models\Role;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\DB;
 class OrderStateService
 {
     public function __construct(
-        private readonly OrderSettlementService $orderSettlementService
+        private readonly OrderSettlementService $orderSettlementService,
+        private readonly FirmCreditService $firmCreditService
     ) {}
 
     /**
@@ -45,6 +47,11 @@ class OrderStateService
     public function transition(Order $order, OrderStatus $next, array $meta = []): void
     {
         DB::transaction(function () use ($order, $next, $meta): void {
+            if ($next === OrderStatus::CourierAssigned) {
+                // Kurye ataması anında sipariş başına kontör düşülür (idempotent).
+                $this->firmCreditService->chargeForAssignment($order);
+            }
+
             if ($next === OrderStatus::Delivered) {
                 $order->loadMissing('firm', 'restaurant');
                 $snap = $this->orderSettlementService->snapshotForDelivery($order);

@@ -6,6 +6,7 @@
     $mktOpen = request()->routeIs('admin.campaigns.*') || request()->routeIs('admin.coupons.*');
     $siteCmsOpen = request()->routeIs('admin.marketing.*');
     $financeOpen = request()->routeIs('admin.finance.*');
+    $creditsOpen = request()->routeIs('admin.credits.*');
     $ordersIdx = request()->routeIs('admin.orders.index');
     $ordersPresetAll = $ordersIdx && ! request()->boolean('active') && ! request()->boolean('awaiting_courier') && ! request()->filled('status');
     $ordersPresetActive = $ordersIdx && request()->boolean('active') && ! request()->boolean('awaiting_courier');
@@ -72,6 +73,20 @@
         <a class="{{ request()->routeIs('admin.finance.index') ? $active : $idle }}" href="{{ route('admin.finance.index') }}">Genel durum</a>
         <a class="{{ request()->routeIs('admin.finance.firms') ? $active : $idle }}" href="{{ route('admin.finance.firms') }}">Şirket ciroları</a>
         <a class="{{ request()->routeIs('admin.finance.reconciliation') ? $active : $idle }}" href="{{ route('admin.finance.reconciliation') }}">Mutabakat</a>
+    </div>
+</details>
+
+<details class="group mt-3" @if($creditsOpen) open @endif>
+    <summary class="flex min-h-11 touch-manipulation cursor-pointer list-none items-center justify-between rounded-md px-2 py-2 text-xs font-semibold uppercase tracking-wider text-slate-400 marker:content-none [&::-webkit-details-marker]:hidden hover:bg-slate-50">
+        <span>Kontör</span>
+        <svg class="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
+    </summary>
+    <div class="ml-2 mt-0.5 space-y-0.5 border-l-2 border-slate-100 pl-2 pb-1">
+        <a class="{{ request()->routeIs('admin.credits.firms') ? $active : $idle }}" href="{{ route('admin.credits.firms') }}">Firma kontörleri</a>
+        <a class="{{ request()->routeIs('admin.credits.purchases') ? $active : $idle }}" href="{{ route('admin.credits.purchases') }}">Satın alma talepleri</a>
+        <a class="{{ request()->routeIs('admin.credits.settings') ? $active : $idle }}" href="{{ route('admin.credits.settings') }}">Fiyat / ayarlar</a>
     </div>
 </details>
 

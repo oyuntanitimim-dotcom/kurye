@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1\Firm;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Modules\Couriers\Models\Courier;
+use App\Modules\Firms\Services\FirmCreditService;
 use App\Modules\Orders\Models\Order;
 use App\Modules\Orders\Services\OrderStateService;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +15,10 @@ use Illuminate\Http\Request;
 
 class AssignCourierController extends Controller
 {
-    public function __construct(private readonly OrderStateService $orderStateService) {}
+    public function __construct(
+        private readonly OrderStateService $orderStateService,
+        private readonly FirmCreditService $firmCreditService
+    ) {}
 
     public function __invoke(Request $request, Order $order): JsonResponse
     {
@@ -48,6 +52,14 @@ class AssignCourierController extends Controller
             && $order->restaurant_courier_requested_at === null
         ) {
             return response()->json(['ok' => false, 'message' => 'Restoran henüz kurye çağırmadı.'], 422);
+        }
+
+        if (! $this->firmCreditService->canAssign($order)) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Kontör yetersiz. Lütfen kontör yükleyin.',
+                'reason' => 'insufficient_credit',
+            ], 402);
         }
 
         $reassignStatuses = [

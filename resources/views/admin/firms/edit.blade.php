@@ -36,12 +36,10 @@
         <input name="logo" value="{{ old('logo', $firm->logo) }}" class="w-full rounded border border-slate-300 px-3 py-2" placeholder="https://… veya /storage/…">
     </div>
     <div>
-        <label class="block text-sm text-slate-600 mb-1">Platform paket başı ücret (₺)</label>
-        <input type="number" step="0.01" name="platform_fee_per_order" value="{{ old('platform_fee_per_order', $firm->platform_fee_per_order) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
-    </div>
-    <div>
-        <label class="block text-sm text-slate-600 mb-1">Varsayılan işletme paket ücreti (₺/teslim)</label>
-        <input type="number" step="0.01" name="default_restaurant_fee_per_delivery" value="{{ old('default_restaurant_fee_per_delivery', $firm->default_restaurant_fee_per_delivery) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
+        <label class="block text-sm text-slate-600 mb-1">Paket başı kontör (adet)</label>
+        <input type="number" step="1" min="1" name="credits_per_order_override" value="{{ old('credits_per_order_override', $firm->credits_per_order_override) }}" placeholder="{{ $globalCreditsPerOrder }}" class="w-full rounded border border-slate-300 px-3 py-2">
+        <p class="text-xs text-slate-500 mt-1">Her kurye atamasında bu firmadan düşülecek kontör. Boş bırakılırsa genel varsayılan ({{ $globalCreditsPerOrder }} kontör) uygulanır.</p>
+        @error('credits_per_order_override')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
     </div>
     <div>
         <label class="block text-sm text-slate-600 mb-1">Durum</label>

@@ -13,6 +13,7 @@
 <p class="text-xs text-slate-500 mb-4">Yakın kurye önerisi için taze konum limiti: <span id="op-max-age" class="font-medium text-slate-700">—</span></p>
 <div class="mb-4 flex flex-wrap gap-2">
     <button type="button" id="op-refresh" class="touch-manipulation rounded-lg bg-slate-900 px-4 py-2.5 text-sm text-white hover:bg-slate-800 sm:py-2">Yenile</button>
+    <button type="button" id="op-fit" class="touch-manipulation rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 sm:py-2">Haritayı sığdır</button>
 </div>
 <div class="grid gap-4 lg:grid-cols-2 mb-6">
     <div class="rounded-xl border border-slate-200 bg-white overflow-hidden min-h-[240px] sm:min-h-[280px] lg:min-h-[320px]">
@@ -65,11 +66,17 @@
     const csrfToken = @json(csrf_token());
     const tb = document.querySelector('#op-orders tbody');
     const btn = document.getElementById('op-refresh');
+    const fitBtn = document.getElementById('op-fit');
     const maxAgeEl = document.getElementById('op-max-age');
     const selectionEl = document.getElementById('op-selection');
     const nearbyCouriersBase = '/firma/operasyon/kuryeler/';
     let map = null;
     let markersLayer = null;
+    // İşaretçileri kimliğe göre saklayıp konumu yerinde güncelliyoruz (harita yenilenince zoom/konum korunur).
+    const courierMarkers = new Map();
+    const orderDeliveryMarkers = new Map();
+    const orderRestaurantMarkers = new Map();
+    let mapFittedOnce = false;
     const REASSIGN_STATUSES = ['courier_assigned', 'courier_accepted', 'picked_up', 'on_the_way'];
     let lastSnapshot = null;
     let highlightClearTimer = null;
@@ -253,44 +260,108 @@
         map.setView([36.8399, 36.2310], 12);
     }
 
-    function renderMap(d) {
-        ensureMap();
-        markersLayer.clearLayers();
-        const bounds = [];
-        (d.couriers || []).forEach(function (c) {
-            if (c.lat != null && c.lng != null && !Number.isNaN(c.lat) && !Number.isNaN(c.lng)) {
-                const m = L.circleMarker([c.lat, c.lng], { radius: 8, color: '#2563eb', weight: 2, fillColor: '#3b82f6', fillOpacity: 0.85 });
-                m.bindTooltip('Kurye #' + c.id + (c.name ? ' — ' + c.name : ''));
-                m.on('click', function () {
-                    highlightCourierRows(c.id);
-                });
-                markersLayer.addLayer(m);
-                bounds.push([c.lat, c.lng]);
+    function upsertMarker(store, key, lat, lng, opts, tooltip, onClick) {
+        let m = store.get(key);
+        if (m) {
+            m.setLatLng([lat, lng]);
+            if (tooltip) {
+                m.setTooltipContent(tooltip);
+            }
+        } else {
+            m = L.circleMarker([lat, lng], opts);
+            if (tooltip) {
+                m.bindTooltip(tooltip);
+            }
+            if (onClick) {
+                m.on('click', onClick);
+            }
+            markersLayer.addLayer(m);
+            store.set(key, m);
+        }
+        return m;
+    }
+
+    function pruneMarkers(store, seenKeys) {
+        store.forEach(function (m, key) {
+            if (!seenKeys.has(key)) {
+                markersLayer.removeLayer(m);
+                store.delete(key);
             }
         });
+    }
+
+    function collectBounds() {
+        const bounds = [];
+        [courierMarkers, orderDeliveryMarkers, orderRestaurantMarkers].forEach(function (store) {
+            store.forEach(function (m) {
+                const ll = m.getLatLng();
+                bounds.push([ll.lat, ll.lng]);
+            });
+        });
+        return bounds;
+    }
+
+    function fitAll() {
+        if (!map) {
+            return;
+        }
+        const bounds = collectBounds();
+        if (bounds.length) {
+            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 15 });
+        }
+    }
+
+    // Sadece işaretçi konumlarını günceller; kullanıcı zoom/kaydırmasını korur.
+    function renderMap(d) {
+        ensureMap();
+
+        const seenCouriers = new Set();
+        (d.couriers || []).forEach(function (c) {
+            if (c.lat != null && c.lng != null && !Number.isNaN(c.lat) && !Number.isNaN(c.lng)) {
+                const key = Number(c.id);
+                upsertMarker(
+                    courierMarkers, key, c.lat, c.lng,
+                    { radius: 8, color: '#2563eb', weight: 2, fillColor: '#3b82f6', fillOpacity: 0.85 },
+                    'Kurye #' + c.id + (c.name ? ' — ' + c.name : ''),
+                    function () { highlightCourierRows(c.id); }
+                );
+                seenCouriers.add(key);
+            }
+        });
+        pruneMarkers(courierMarkers, seenCouriers);
+
+        const seenDelivery = new Set();
+        const seenRestaurant = new Set();
         (d.orders || []).forEach(function (o) {
             const delOk = o.delivery && o.delivery.lat != null && o.delivery.lng != null && (o.delivery.show_on_map === true || o.delivery.show_on_map === 1 || o.delivery.show_on_map === '1');
             if (delOk) {
-                const m = L.circleMarker([o.delivery.lat, o.delivery.lng], { radius: 9, color: '#ea580c', weight: 2, fillColor: '#f97316', fillOpacity: 0.85 });
-                m.bindTooltip('Sipariş #' + o.id + ' (teslimat)');
-                m.on('click', function () {
-                    highlightOrderRow(o.id);
-                });
-                markersLayer.addLayer(m);
-                bounds.push([o.delivery.lat, o.delivery.lng]);
+                const key = Number(o.id);
+                upsertMarker(
+                    orderDeliveryMarkers, key, o.delivery.lat, o.delivery.lng,
+                    { radius: 9, color: '#ea580c', weight: 2, fillColor: '#f97316', fillOpacity: 0.85 },
+                    'Sipariş #' + o.id + ' (teslimat)',
+                    function () { highlightOrderRow(o.id); }
+                );
+                seenDelivery.add(key);
             }
             if (o.restaurant && o.restaurant.lat != null && o.restaurant.lng != null) {
-                const m = L.circleMarker([o.restaurant.lat, o.restaurant.lng], { radius: 7, color: '#16a34a', weight: 2, fillColor: '#22c55e', fillOpacity: 0.75 });
-                m.bindTooltip((o.restaurant.name || 'Restoran') + ' (çıkış)');
-                m.on('click', function () {
-                    highlightOrderRow(o.id);
-                });
-                markersLayer.addLayer(m);
-                bounds.push([o.restaurant.lat, o.restaurant.lng]);
+                const key = Number(o.id);
+                upsertMarker(
+                    orderRestaurantMarkers, key, o.restaurant.lat, o.restaurant.lng,
+                    { radius: 7, color: '#16a34a', weight: 2, fillColor: '#22c55e', fillOpacity: 0.75 },
+                    (o.restaurant.name || 'Restoran') + ' (çıkış)',
+                    function () { highlightOrderRow(o.id); }
+                );
+                seenRestaurant.add(key);
             }
         });
-        if (bounds.length) {
-            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 15 });
+        pruneMarkers(orderDeliveryMarkers, seenDelivery);
+        pruneMarkers(orderRestaurantMarkers, seenRestaurant);
+
+        // Yalnızca ilk veri geldiğinde haritayı sığdır; sonraki yenilemelerde kullanıcı görünümü korunur.
+        if (!mapFittedOnce && collectBounds().length) {
+            fitAll();
+            mapFittedOnce = true;
         }
         setTimeout(function () { map.invalidateSize(); }, 100);
     }
@@ -452,7 +523,13 @@
         });
     }
 
+    let opLoading = false;
     function loadOp() {
+        // Onceki istek bitmeden yenisini baslatma (5 sn aralikta ust uste binmeyi onler).
+        if (opLoading) {
+            return;
+        }
+        opLoading = true;
         fetch(@json(route('firm.operations.snapshot', [], false)), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             credentials: 'same-origin',
@@ -516,10 +593,16 @@
                 td.textContent = 'Özet yüklenemedi. ' + (status ? (status + '. ') : '') + hint;
                 tr.appendChild(td);
                 tb.appendChild(tr);
+            })
+            .finally(function () {
+                opLoading = false;
             });
     }
 
     btn.addEventListener('click', loadOp);
+    if (fitBtn) {
+        fitBtn.addEventListener('click', fitAll);
+    }
     document.addEventListener('keydown', function (ev) {
         if (ev.key !== 'Escape') {
             return;
@@ -532,7 +615,7 @@
         setSelectionHtml('');
     });
     loadOp();
-    setInterval(loadOp, 12000);
+    setInterval(loadOp, 5000);
     window.addEventListener('kurye-firm-board-changed', function () {
         loadOp();
     });

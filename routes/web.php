@@ -24,6 +24,8 @@ use App\Http\Controllers\Firm\ReportController as FirmReportController;
 use App\Http\Controllers\Firm\RestaurantController as FirmRestaurantController;
 use App\Http\Controllers\Firm\SettingsController as FirmSettingsController;
 use App\Http\Controllers\Admin\FinanceController as AdminFinanceController;
+use App\Http\Controllers\Admin\CreditController as AdminCreditController;
+use App\Http\Controllers\Firm\CreditController as FirmCreditController;
 use App\Http\Controllers\Firm\CouponController as FirmCouponController;
 use App\Http\Controllers\Firm\FinanceController as FirmFinanceController;
 use App\Http\Controllers\Firm\CourierPayoutController as FirmCourierPayoutController;
@@ -125,6 +127,17 @@ Route::prefix('admin')->middleware(['auth', 'active.account', 'admin.auth'])->gr
     Route::get('/finans', [AdminFinanceController::class, 'index'])->name('admin.finance.index');
     Route::get('/finans/kurye-sirketleri', [AdminFinanceController::class, 'firms'])->name('admin.finance.firms');
     Route::get('/finans/mutabakat', [AdminFinanceController::class, 'reconciliation'])->name('admin.finance.reconciliation');
+
+    Route::get('/kontor', [AdminCreditController::class, 'firms'])->name('admin.credits.firms');
+    Route::get('/kontor/ayarlar', [AdminCreditController::class, 'settings'])->name('admin.credits.settings');
+    Route::put('/kontor/ayarlar', [AdminCreditController::class, 'updateSettings'])->name('admin.credits.settings.update');
+    Route::get('/kontor/talepler', [AdminCreditController::class, 'purchases'])->name('admin.credits.purchases');
+    Route::post('/kontor/talepler/{purchase}/onayla', [AdminCreditController::class, 'approvePurchase'])->name('admin.credits.purchases.approve');
+    Route::post('/kontor/talepler/{purchase}/reddet', [AdminCreditController::class, 'rejectPurchase'])->name('admin.credits.purchases.reject');
+    Route::get('/kontor/firmalar/{firm}/gecmis', [AdminCreditController::class, 'firmHistory'])->name('admin.credits.firm.history');
+    Route::post('/kontor/firmalar/{firm}/duzelt', [AdminCreditController::class, 'adjust'])->name('admin.credits.adjust');
+    Route::put('/kontor/firmalar/{firm}', [AdminCreditController::class, 'updateFirm'])->name('admin.credits.firm.update');
+
     Route::view('/ayarlar', 'admin.settings', ['title' => 'Ayarlar'])->name('admin.settings');
 
     Route::prefix('marketing')->name('admin.marketing.')->group(function (): void {
@@ -154,6 +167,10 @@ Route::prefix('admin')->middleware(['auth', 'active.account', 'admin.auth'])->gr
 
 Route::prefix('firma')->middleware(['auth', 'active.account', 'firm.auth'])->group(function (): void {
     Route::get('/', FirmDashboardController::class)->name('firm.dashboard');
+    Route::get('/kontor', [FirmCreditController::class, 'index'])->name('firm.credits.index');
+    Route::post('/kontor/satin-al', [FirmCreditController::class, 'purchase'])
+        ->middleware('throttle:30,1')
+        ->name('firm.credits.purchase');
     Route::get('/operasyon', [FirmOperationsController::class, 'index'])->name('firm.operations.index');
     Route::get('/operasyon/ozet', [FirmOperationsController::class, 'snapshot'])
         ->middleware('throttle:240,1')

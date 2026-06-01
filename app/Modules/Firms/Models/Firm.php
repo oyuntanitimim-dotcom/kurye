@@ -21,6 +21,8 @@ class Firm extends Model
         'opening_hours',
         'status',
         'settings',
+        'credit_balance',
+        'credits_per_order_override',
     ];
 
     protected function casts(): array
@@ -30,6 +32,8 @@ class Firm extends Model
             'default_restaurant_fee_per_delivery' => 'decimal:2',
             'opening_hours' => 'array',
             'settings' => 'array',
+            'credit_balance' => 'integer',
+            'credits_per_order_override' => 'integer',
         ];
     }
 
@@ -86,5 +90,15 @@ class Firm extends Model
     public function coupons(): HasMany
     {
         return $this->hasMany(Coupon::class);
+    }
+
+    public function creditTransactions(): HasMany
+    {
+        return $this->hasMany(FirmCreditTransaction::class);
+    }
+
+    public function creditPurchases(): HasMany
+    {
+        return $this->hasMany(FirmCreditPurchase::class);
     }
 }

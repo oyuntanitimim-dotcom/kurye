@@ -48,15 +48,9 @@
             </div>
 
             <div class="sm:col-span-2">
-                <label class="block text-sm text-slate-600 mb-1">Platform paket başı ücret (₺)</label>
-                <input type="number" step="0.01" name="platform_fee_per_order" value="{{ old('platform_fee_per_order', 0) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
-                <p class="text-xs text-slate-500 mt-1">Teslim edilen her sipariş için platforma ödenecek sabit tutar.</p>
-            </div>
-
-            <div class="sm:col-span-2">
-                <label class="block text-sm text-slate-600 mb-1">Varsayılan işletme paket ücreti (₺/teslim)</label>
-                <input type="number" step="0.01" name="default_restaurant_fee_per_delivery" value="{{ old('default_restaurant_fee_per_delivery', 0) }}" required class="w-full rounded border border-slate-300 px-3 py-2">
-                <p class="text-xs text-slate-500 mt-1">İşletmede özel tutar yoksa her teslim için bu sabit ücret uygulanır.</p>
+                <label class="block text-sm text-slate-600 mb-1">Paket başı kontör (adet)</label>
+                <input type="number" step="1" min="1" name="credits_per_order_override" value="{{ old('credits_per_order_override') }}" placeholder="{{ $globalCreditsPerOrder }}" class="w-full rounded border border-slate-300 px-3 py-2">
+                <p class="text-xs text-slate-500 mt-1">Her kurye atamasında bu firmadan düşülecek kontör. Boş = genel varsayılan ({{ $globalCreditsPerOrder }} kontör).</p>
             </div>
         </div>
 
@@ -107,8 +101,7 @@
         <tr class="border-b border-slate-200 text-left text-slate-500">
             <th class="py-2">Ad</th>
             <th>Domain</th>
-            <th>Paket başı (₺)</th>
-            <th>Vars. işl. paket (₺)</th>
+            <th>Paket başı kontör</th>
             <th>Durum</th>
             <th></th>
         </tr>
@@ -118,8 +111,7 @@
             <tr class="border-b border-slate-100">
                 <td class="py-2 font-medium">{{ $f->name }}</td>
                 <td>{{ $f->domain }}</td>
-                <td>{{ number_format((float) $f->platform_fee_per_order, 2) }}</td>
-                <td>{{ number_format((float) $f->default_restaurant_fee_per_delivery, 2) }}</td>
+                <td>{{ $f->credits_per_order_override ?? $globalCreditsPerOrder }} <span class="text-xs text-slate-400">kontör</span></td>
                 <td>{{ $f->status }}</td>
                 <td class="space-x-3 whitespace-nowrap">
                     <a class="text-slate-600 hover:underline" href="{{ route('admin.firms.show', $f) }}">Detay</a>
