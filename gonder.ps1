@@ -77,6 +77,8 @@ tar -xzf $remoteTar
 rm -f $remoteTar
 bash deploy/post-deploy.sh
 "@
+# Windows CRLF -> LF: uzak bash satir sonundaki \r yuzunden komutlari bozuyordu.
+$remoteScript = $remoteScript -replace "`r", ""
 if (-not (& ssh @sshArgs "${SSH_USER}@${SSH_HOST}" $remoteScript)) {
     Write-Host "`nSSH basarisiz." -ForegroundColor Red
     Write-Host "- id_rsa parolali: once .\deploy\ssh-agent-bir-kez.ps1" -ForegroundColor Yellow
