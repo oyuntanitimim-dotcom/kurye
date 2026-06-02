@@ -33,13 +33,13 @@ Route::prefix('v1')->group(function (): void {
     Route::post('/integrations/{provider}/webhook', [IntegrationWebhookController::class, 'handle'])
         ->middleware('throttle:integration-webhook');
 
-    Route::middleware(['auth:sanctum', 'active.account', 'api.tenant', 'throttle:courier-location'])->group(function (): void {
+    Route::middleware(['auth:sanctum', 'active.account', 'firm.from_auth', 'api.tenant', 'throttle:courier-location'])->group(function (): void {
         Route::middleware('role:'.Role::COURIER)->group(function (): void {
             Route::post('/courier/location', [CourierLocationApiController::class, 'store']);
         });
     });
 
-    Route::middleware(['auth:sanctum', 'active.account', 'api.tenant', 'throttle:120,1'])->group(function (): void {
+    Route::middleware(['auth:sanctum', 'active.account', 'firm.from_auth', 'api.tenant', 'throttle:120,1'])->group(function (): void {
         Route::get('/me', MeController::class);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 

@@ -63,7 +63,7 @@ Route::post('/giris', [UnifiedAuthController::class, 'login'])
     ->name('login.store');
 Route::post('/cikis', [UnifiedAuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::middleware(['auth', 'active.account'])->group(function (): void {
+Route::middleware(['auth', 'active.account', 'firm.from_auth'])->group(function (): void {
     Route::get('/bildirimler', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/bildirimler/tumunu-okundu', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
     Route::post('/bildirimler/{notification}/okundu', [NotificationController::class, 'markRead'])->name('notifications.markRead');
@@ -93,7 +93,7 @@ Route::get('/siparislerim/{order}', function (\App\Modules\Orders\Models\Order $
 })->whereNumber('order')->name('legacy.shop.order');
 Route::permanentRedirect('/profil', '/alisveris/profil');
 
-Route::prefix('admin')->middleware(['auth', 'active.account', 'admin.auth'])->group(function (): void {
+Route::prefix('admin')->middleware(['auth', 'active.account', 'firm.from_auth', 'admin.auth'])->group(function (): void {
     Route::get('/', AdminDashboardController::class)->name('admin.dashboard');
 
     Route::get('/firmalar', [AdminFirmController::class, 'index'])->name('admin.firms.index');
@@ -165,7 +165,7 @@ Route::prefix('admin')->middleware(['auth', 'active.account', 'admin.auth'])->gr
     });
 });
 
-Route::prefix('firma')->middleware(['auth', 'active.account', 'firm.auth'])->group(function (): void {
+Route::prefix('firma')->middleware(['auth', 'active.account', 'firm.from_auth', 'firm.auth', 'web.tenant'])->group(function (): void {
     Route::get('/', FirmDashboardController::class)->name('firm.dashboard');
     Route::get('/kontor', [FirmCreditController::class, 'index'])->name('firm.credits.index');
     Route::post('/kontor/satin-al', [FirmCreditController::class, 'purchase'])
@@ -239,7 +239,7 @@ Route::prefix('firma')->middleware(['auth', 'active.account', 'firm.auth'])->gro
     Route::put('/ayarlar', [FirmSettingsController::class, 'update'])->name('firm.settings.update');
 });
 
-Route::prefix('restoran')->middleware(['auth', 'active.account', 'restaurant.auth'])->group(function (): void {
+Route::prefix('restoran')->middleware(['auth', 'active.account', 'firm.from_auth', 'restaurant.auth', 'web.tenant'])->group(function (): void {
     Route::get('/', RestaurantDashboardController::class)->name('restaurant.dashboard');
     Route::get('/siparisler', [RestaurantOrderController::class, 'index'])->name('restaurant.orders.index');
     Route::get('/siparisler/poll', [RestaurantOrderController::class, 'poll'])
@@ -313,7 +313,7 @@ Route::prefix('restoran')->middleware(['auth', 'active.account', 'restaurant.aut
     Route::put('/ayarlar', [RestaurantSettingsController::class, 'update'])->name('restaurant.settings.update');
 });
 
-Route::prefix('kurye')->middleware(['auth', 'active.account', 'courier.auth'])->group(function (): void {
+Route::prefix('kurye')->middleware(['auth', 'active.account', 'firm.from_auth', 'courier.auth', 'web.tenant'])->group(function (): void {
     Route::get('/', CourierDashboardController::class)->name('courier.dashboard');
     Route::get('/kazanc', CourierEarningsController::class)->name('courier.earnings');
     Route::post('/siparisler/{order}/kabul', [CourierOrderController::class, 'accept'])->name('courier.orders.accept');

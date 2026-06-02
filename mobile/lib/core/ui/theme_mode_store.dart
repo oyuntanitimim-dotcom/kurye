@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kurye_mobile/core/storage/app_secure_storage.dart';
 
 enum AppThemePreference {
   system,
@@ -10,7 +11,7 @@ enum AppThemePreference {
 class ThemeModeStore extends ChangeNotifier {
   static const _key = 'theme_preference';
 
-  ThemeModeStore({FlutterSecureStorage? storage}) : _storage = storage ?? const FlutterSecureStorage();
+  ThemeModeStore({FlutterSecureStorage? storage}) : _storage = storage ?? appSecureStorage;
 
   final FlutterSecureStorage _storage;
 
@@ -25,12 +26,16 @@ class ThemeModeStore extends ChangeNotifier {
       };
 
   Future<void> load() async {
-    final raw = await _storage.read(key: _key);
-    _pref = switch (raw) {
-      'light' => AppThemePreference.light,
-      'dark' => AppThemePreference.dark,
-      _ => AppThemePreference.system,
-    };
+    try {
+      final raw = await _storage.read(key: _key);
+      _pref = switch (raw) {
+        'light' => AppThemePreference.light,
+        'dark' => AppThemePreference.dark,
+        _ => AppThemePreference.system,
+      };
+    } catch (_) {
+      _pref = AppThemePreference.system;
+    }
     notifyListeners();
   }
 

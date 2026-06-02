@@ -2,9 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotifications {
-  LocalNotifications(this._plugin);
+  LocalNotifications(this._plugin, {this.enabled = true});
 
-  final FlutterLocalNotificationsPlugin _plugin;
+  final FlutterLocalNotificationsPlugin? _plugin;
+  final bool enabled;
+
+  /// Bildirim eklentisi başlatılamazsa (bazı MIUI sürümleri) sessiz devam.
+  factory LocalNotifications.noop() => LocalNotifications(null, enabled: false);
 
   static Future<LocalNotifications> init() async {
     final plugin = FlutterLocalNotificationsPlugin();
@@ -36,7 +40,7 @@ class LocalNotifications {
   }
 
   Future<void> incomingOrder({required int orderId, String? title}) async {
-    if (kIsWeb) {
+    if (!enabled || kIsWeb || _plugin == null) {
       return;
     }
     const androidDetails = AndroidNotificationDetails(
@@ -59,7 +63,7 @@ class LocalNotifications {
   }
 
   Future<void> firmIncomingOrder({required int orderId, String? title}) async {
-    if (kIsWeb) {
+    if (!enabled || kIsWeb || _plugin == null) {
       return;
     }
     const androidDetails = AndroidNotificationDetails(

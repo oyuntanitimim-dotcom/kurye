@@ -3,7 +3,7 @@ import 'package:kurye_mobile/core/app_scope.dart';
 import 'package:kurye_mobile/core/ui/app_background.dart';
 import 'package:kurye_mobile/core/ui/app_content.dart';
 import 'package:kurye_mobile/core/ui/glass_card.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kurye_mobile/core/storage/app_secure_storage.dart';
 import 'package:kurye_mobile/features/courier/courier_api.dart';
 import 'package:kurye_mobile/features/courier/courier_orders_screen.dart';
 import 'package:kurye_mobile/features/courier/courier_stats_api.dart';
@@ -21,7 +21,7 @@ class CourierHomeScreen extends StatefulWidget {
 
 class _CourierHomeScreenState extends State<CourierHomeScreen> {
   static const _workingKey = 'courier_working';
-  static const _storage = FlutterSecureStorage();
+  static const _storage = appSecureStorage;
 
   bool _working = true;
   bool _loaded = false;

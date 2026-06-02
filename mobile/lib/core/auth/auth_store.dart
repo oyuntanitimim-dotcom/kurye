@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kurye_mobile/core/storage/app_secure_storage.dart';
 
 enum AppRole {
   courier,
@@ -57,7 +57,7 @@ class AuthStore extends ChangeNotifier {
   static const _tokenKey = 'auth_token';
   static const _meKey = 'auth_me';
 
-  final _storage = const FlutterSecureStorage();
+  static const _storage = appSecureStorage;
 
   String? _token;
   Me? _me;
@@ -66,13 +66,20 @@ class AuthStore extends ChangeNotifier {
   Me? get me => _me;
 
   Future<void> load() async {
-    _token = await _storage.read(key: _tokenKey);
-    final raw = await _storage.read(key: _meKey);
-    if (raw != null && raw.isNotEmpty) {
-      final decoded = jsonDecode(raw);
-      if (decoded is Map<String, dynamic>) {
-        _me = Me.fromJson(decoded);
+    try {
+      _token = await _storage.read(key: _tokenKey);
+      final raw = await _storage.read(key: _meKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          _me = Me.fromJson(decoded);
+        }
       }
+    } catch (_) {
+      _token = null;
+      _me = null;
+      await _storage.delete(key: _tokenKey);
+      await _storage.delete(key: _meKey);
     }
     notifyListeners();
   }

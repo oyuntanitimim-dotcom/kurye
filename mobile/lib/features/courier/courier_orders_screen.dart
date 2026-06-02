@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:kurye_mobile/core/app_scope.dart';
+import 'package:kurye_mobile/core/location/foreground_location_service.dart';
 import 'package:kurye_mobile/core/ui/app_background.dart';
 import 'package:kurye_mobile/core/ui/app_content.dart';
 import 'package:kurye_mobile/core/ui/glass_card.dart';
@@ -203,6 +204,7 @@ class _CourierOrdersSectionState extends State<CourierOrdersSection> {
   Future<void> _toggleSharing() async {
     if (_sharing) {
       setState(() => _sharing = false);
+      await ForegroundLocationService.stop();
       return;
     }
 
@@ -224,6 +226,7 @@ class _CourierOrdersSectionState extends State<CourierOrdersSection> {
     }
 
     setState(() => _sharing = true);
+    await ForegroundLocationService.start();
     while (_sharing && mounted) {
       try {
         final pos = await Geolocator.getCurrentPosition(

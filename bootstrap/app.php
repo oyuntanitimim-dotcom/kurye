@@ -26,9 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'restaurant.auth' => \App\Http\Middleware\EnsureRestaurantAuthenticated::class,
             'courier.auth' => \App\Http\Middleware\EnsureCourierAuthenticated::class,
             'firm.resolve' => \App\Http\Middleware\ResolveFirmFromDomain::class,
+            'firm.from_auth' => \App\Http\Middleware\ResolveFirmFromAuth::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
             'active.account' => \App\Http\Middleware\EnsureActiveAccount::class,
             'api.tenant' => \App\Http\Middleware\EnsureApiTenantBoundaries::class,
+            'web.tenant' => \App\Http\Middleware\EnsureWebTenantBoundaries::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
