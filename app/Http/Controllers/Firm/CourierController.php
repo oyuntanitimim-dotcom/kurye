@@ -11,6 +11,7 @@ use App\Modules\Users\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -56,25 +57,29 @@ class CourierController extends Controller
 
         $roleId = Role::query()->where('name', Role::COURIER)->value('id');
 
-        $user = User::query()->create([
-            'firm_id' => $firmId,
-            'restaurant_id' => null,
-            'role_id' => $roleId,
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => Hash::make($data['password']),
-            'status' => 'active',
-        ]);
+        // User + Courier atomik olusur; biri basarisiz olursa kullanici da geri alinir
+        // (aksi halde e-postasi "alinmis" gorunen ama listede olmayan yetim kullanici kalir).
+        DB::transaction(function () use ($firmId, $roleId, $data): void {
+            $user = User::query()->create([
+                'firm_id' => $firmId,
+                'restaurant_id' => null,
+                'role_id' => $roleId,
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'password' => Hash::make($data['password']),
+                'status' => 'active',
+            ]);
 
-        Courier::query()->create(array_merge([
-            'firm_id' => $firmId,
-            'user_id' => $user->id,
-            'name' => $data['name'],
-            'phone' => $data['phone'] ?? null,
-            'vehicle_type' => $data['vehicle_type'] ?? null,
-            'status' => $data['status'],
-        ], $this->normalizedCompensation($data)));
+            Courier::query()->create(array_merge([
+                'firm_id' => $firmId,
+                'user_id' => $user->id,
+                'name' => $data['name'],
+                'phone' => $data['phone'] ?? null,
+                'vehicle_type' => $data['vehicle_type'] ?? null,
+                'status' => $data['status'],
+            ], $this->normalizedCompensation($data)));
+        });
 
         return redirect()->route('firm.couriers.index')->with('status', 'Kurye oluşturuldu.');
     }
